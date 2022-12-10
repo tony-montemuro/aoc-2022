@@ -1,17 +1,3 @@
-# function that will update the head position
-def update_head(x_head, y_head, dir):
-    match dir:
-        case 'U':
-            y_head += 1
-        case 'L':
-            x_head += 1
-        case 'D':
-            y_head -= 1
-        case 'R':
-            x_head -= 1
-    return x_head, y_head
-
-
 def update_rope(x_head, y_head, x_tail, y_tail):
     # first, handle these 4 cases:
     # . H .
@@ -35,54 +21,45 @@ def update_rope(x_head, y_head, x_tail, y_tail):
     # return new tail values
     return x_tail, y_tail
 
+# function that will model the rope physics for num_ropes ropes. this function
+# returns the number of unique positions visited by the tail of the rope
+def model_rope(instructions, num_ropes):
+    # define variables
+    head_dict = {'U': [0, 1], 'L': [1, 0], 'D': [0, -1], 'R': [-1, 0]}
+    tail_pos = set()
+    rope_pos = [[0, 0] for i in range(0, num_ropes)]
+
+    # interate through instructions
+    for instr in instructions:
+        # initialize variables
+        instr = instr.split(' ')
+        head_update_vals = head_dict[instr[0]]
+        x_head, y_head = head_update_vals[0], head_update_vals[1]
+        dist = int(instr[1])
+
+        # now update the rope, and add the position of the final rope to the tail_pos set
+        for i in range(0, dist):
+            # update head
+            rope_pos[0][0] += x_head
+            rope_pos[0][1] += y_head
+            
+            # update tail
+            for j in range(0, num_ropes-1):
+                rope_pos[j+1][0], rope_pos[j+1][1] = update_rope(rope_pos[j][0], rope_pos[j][1], rope_pos[j+1][0], rope_pos[j+1][1])
+            tail_pos.add((rope_pos[num_ropes-1][0], rope_pos[num_ropes-1][1]))
+    
+    # return the number of positions visited by the tail of the rope
+    return len(tail_pos)
+
 # main function
 def main():
     # open file
     f = open("puzzle.txt", "r")
     instructions = f.read().split('\n')
-    
-    # define variables used in part 1
-    tail_pos = set()
-    x_head, y_head = 0, 0
-    x_tail, y_tail = 0, 0
 
-    # iterate through the instructions
-    for instr in instructions:
-        # get direction and distance from instruction
-        instr = instr.split(' ')
-        dir = instr[0]
-        dist = int(instr[1])
-
-        # now update the rope dist times, and add the position of the tail to the tail_pos set
-        for i in range(0, dist):
-            x_head, y_head = update_head(x_head, y_head, dir)
-            x_tail, y_tail = update_rope(x_head, y_head, x_tail, y_tail)
-            tail_pos.add((x_tail, y_tail))
-
-    # print result for part 1
-    print(len(tail_pos))
-
-    # define variables used in part 2
-    num_ropes = 10
-    tail_pos = set()
-    rope_pos = [[0, 0] for i in range(0, num_ropes)]
-    
-    # interate through instructions
-    for index, instr in enumerate(instructions):
-        # get direction and distance from instruction
-        instr = instr.split(' ')
-        dir = instr[0]
-        dist = int(instr[1])
-
-        # now update the rope dist times, and add the position of the final rope to the tail_pos set
-        for i in range(0, dist):
-            rope_pos[0][0], rope_pos[0][1] = update_head(rope_pos[0][0], rope_pos[0][1], dir)
-            for j in range(0, num_ropes-1):
-                rope_pos[j+1][0], rope_pos[j+1][1] = update_rope(rope_pos[j][0], rope_pos[j][1], rope_pos[j+1][0], rope_pos[j+1][1])
-            tail_pos.add((rope_pos[9][0], rope_pos[9][1]))
-
-    # print result for part 2
-    print(len(tail_pos))
+    # perform part 1 and part 2, and print results
+    print(model_rope(instructions, 2))
+    print(model_rope(instructions, 10))
     
     # close file
     f.close()

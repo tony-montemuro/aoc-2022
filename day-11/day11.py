@@ -47,13 +47,8 @@ class Monkey:
 
 # function that will perform chinese remainder theorem in order to reduce an item
 def clean_item(item, moduli):
-    remainders = []
-    for module in moduli:
-        remainders.append(item % module)
-    if 0 not in remainders:
-        return crt(moduli, remainders)[0]
-    else:
-        return item
+    remainders = [item % module for module in moduli]
+    return crt(moduli, remainders)[0] if 0 not in remainders else item
 
 # function that will simulate the monkey Keep Away game. return monkey buiness score
 def keep_away(monkey_list, num_rounds, is_worried, moduli):
@@ -61,8 +56,7 @@ def keep_away(monkey_list, num_rounds, is_worried, moduli):
         # each monkey will inspect their elements
         for monkey in monkey_list:
             items = monkey.get_items()
-            for item in items:
-                worry = item
+            for worry in items:
                 worry = monkey.calc_worry(worry)
                 worry = floor(worry/3) if not is_worried else clean_item(worry, moduli)
                 is_divisible = monkey.is_divisible(worry)
@@ -85,16 +79,15 @@ def main():
     monkey_list, moduli = [], []
     monkeys = [monkey.split('\n') for monkey in monkeys]
     for monkey in monkeys:
-        starting = monkey[1].strip().split(' ')[2:]
-        starting = [int(num[:2]) for num in starting]
+        starting = [int(num[:2]) for num in monkey[1].strip().split(' ')[2:]]
         operation_arr = monkey[2].strip().split(' ')[4:]
         is_add = True if operation_arr[0] == '+' else False
         n2 = int(operation_arr[1]) if operation_arr[1] != 'old' else operation_arr[1]
         divisor = int(monkey[3].strip().split(' ')[-1])
-        moduli.append(divisor)
         true_monkey = int(monkey[4].strip().split(' ')[-1])
         false_monkey = int(monkey[5].strip().split(' ')[-1])
         monkey_list.append(Monkey(starting, divisor, is_add, n2, true_monkey, false_monkey))
+        moduli.append(divisor)
 
     # create a copy of monkey_list for part 2
     monkey_list_copy = [deepcopy(monkey) for monkey in monkey_list]

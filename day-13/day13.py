@@ -4,13 +4,6 @@ from functools import cmp_to_key
 # RETURNS: -1: l1 < l2 (order is correct for part 2), 1: l1 > l2 (order is incorrect for part 2)
 # 0: l1 = l2. useful for part 2
 def compare_lists(l1, l2):
-    # general case: lists contain integers or lists
-    # first, check if either list is empty
-    if len(l1) == 0:
-        return -1
-    if len(l2) == 0:
-        return 1
-
     # next, general comparisons: these can be integers and integers,
     # lists and lists, or mixed types
     i = 0
